@@ -1,4 +1,4 @@
-	//¤¤­ÈÂoªi
+	//Â¤Â¤Â­ÃˆÃ‚oÂªi
         private void MedianButton_Click(object sender, EventArgs e)
         {            
             const int MASK_SIZE = 5;
@@ -35,16 +35,16 @@
             for (int y = 0; y < height - MASK_SIZE + 1; y++)
                 for (int x = width - MASK_SIZE + 1; x < width; x++)
                 {
-                    Result_frame.Data[y, x, 0] = Result_frame.Data[y, x - 4, 0];
-                    Result_frame.Data[y, x, 1] = Result_frame.Data[y, x - 4, 1];
-                    Result_frame.Data[y, x, 2] = Result_frame.Data[y, x - 4, 2];
+                    Result_frame.Data[y, x, 0] = Result_frame.Data[y, x - MASK_SIZE + 1, 0];
+                    Result_frame.Data[y, x, 1] = Result_frame.Data[y, x - MASK_SIZE + 1, 1];
+                    Result_frame.Data[y, x, 2] = Result_frame.Data[y, x - MASK_SIZE + 1, 2];
                 }
             for (int y = height - MASK_SIZE + 1; y < height; y++)
                 for (int x = 0; x < width; x++)
                 {
-                    Result_frame.Data[y, x, 0] = Result_frame.Data[y - 4, x, 0];
-                    Result_frame.Data[y, x, 1] = Result_frame.Data[y - 4, x, 1];
-                    Result_frame.Data[y, x, 2] = Result_frame.Data[y - 4, x, 2];
+                    Result_frame.Data[y, x, 0] = Result_frame.Data[y - MASK_SIZE + 1, x, 0];
+                    Result_frame.Data[y, x, 1] = Result_frame.Data[y - MASK_SIZE + 1, x, 1];
+                    Result_frame.Data[y, x, 2] = Result_frame.Data[y - MASK_SIZE + 1, x, 2];
                 }        
             OutputPictureBox.Image = Result_frame.ToBitmap();
         }
