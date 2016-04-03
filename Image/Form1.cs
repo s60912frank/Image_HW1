@@ -26,7 +26,13 @@ namespace Image
        
         private int width;  //圖片的寬度
         private int height; //圖片的長度
-      
+
+        private Process nowProcess = Process.Binarization;
+        private enum Process
+        {
+            Binarization,
+            MedianFilter
+        };
    
         public Form1()
         {
@@ -78,7 +84,11 @@ namespace Image
         private void binarizationButton_Click(object sender, EventArgs e)
         {
             thresholdBar.Enabled = true;
-            Binarization((byte)thresholdBar.Value);
+            nowProcess = Process.Binarization;
+            thresholdBar.Maximum = Byte.MaxValue;
+            thresholdBar.Minimum = Byte.MinValue;
+            thresholdBar.Value = 127;
+            Binarization();
         }
 
 
@@ -126,6 +136,36 @@ namespace Image
         private void reliefButton_Click(object sender, EventArgs e) 
         {
             thresholdBar.Enabled = false;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width - 1; x++)
+                {
+                    byte pixelB = Source_frame.Data[y, x, 0];
+                    byte pixelG = Source_frame.Data[y, x, 1];
+                    byte pixelR = Source_frame.Data[y, x, 2];
+                    byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
+                    byte pixelB2 = Source_frame.Data[y, x + 1, 0];
+                    byte pixelG2 = Source_frame.Data[y, x + 1, 1];
+                    byte pixelR2 = Source_frame.Data[y, x + 1, 2];
+                    byte grayPixel2 = (byte)((pixelB2 + pixelG2 + pixelR2) / 3);
+
+                    int direction = (grayPixel - grayPixel2) > 0 ? 1 : -1;
+                    int difference = Math.Abs(grayPixel - grayPixel2);
+                    byte Result = (byte)(direction * Math.Sqrt(difference / 2) * Math.Sqrt(127) + 127);
+
+                    Result_frame.Data[y, x, 0] = Result;
+                    Result_frame.Data[y, x, 1] = Result;
+                    Result_frame.Data[y, x, 2] = Result;
+                }
+            }
+            for (int y = 0; y < height; y++)
+            {
+                Result_frame.Data[y, width - 1, 0] = Result_frame.Data[y, width - 2, 0];
+                Result_frame.Data[y, width - 1, 1] = Result_frame.Data[y, width - 2, 0];
+                Result_frame.Data[y, width - 1, 2] = Result_frame.Data[y, width - 2, 0];
+            }
+
+            OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
       
@@ -133,7 +173,12 @@ namespace Image
         //中值濾波
         private void MedianButton_Click(object sender, EventArgs e)
         {
-            thresholdBar.Enabled = false;
+            thresholdBar.Enabled = true;
+            nowProcess = Process.MedianFilter;
+            thresholdBar.Maximum = 10;
+            thresholdBar.Minimum = 3;
+            thresholdBar.Value = 3;
+            MedianFilter();
         }
 
 
@@ -155,11 +200,19 @@ namespace Image
         private void thresholdBar_Scroll(object sender, EventArgs e) //拉那個什麼的時候會觸發的事件
         {
             TrackBar bar = sender as TrackBar;
-            Binarization((byte)bar.Value);
-            
+            if (nowProcess == Process.Binarization)
+            {
+                thresholdBar.Maximum = Byte.MaxValue;
+                thresholdBar.Minimum = Byte.MinValue;
+                Binarization();
+            }
+            else if (nowProcess == Process.MedianFilter)
+            {
+                MedianFilter();
+            }
         }
 
-        private void Binarization(byte threshold) //二值化
+        private void Binarization() //二值化
         {
             for (int y = 0; y < height; y++)
             {
@@ -169,7 +222,7 @@ namespace Image
                     byte pixelG = Source_frame.Data[y, x, 1];
                     byte pixelR = Source_frame.Data[y, x, 2];
                     byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
-                    if (grayPixel >= threshold)
+                    if (grayPixel >= thresholdBar.Value)
                     {
                         Result_frame.Data[y, x, 0] = Byte.MaxValue;
                         Result_frame.Data[y, x, 1] = Byte.MaxValue;
@@ -186,5 +239,58 @@ namespace Image
             OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
+        private void MedianFilter() //中值濾波
+        {
+            int MaskSize = thresholdBar.Value;
+            int squrtMaskSize = MaskSize * MaskSize;
+            for (int y = 0; y < height - MaskSize + 1; y++)
+                for (int x = 0; x < width - MaskSize + 1; x++)
+                {
+                    int[] arrayB = new int[squrtMaskSize];
+                    int[] arrayG = new int[squrtMaskSize];
+                    int[] arrayR = new int[squrtMaskSize];
+                    int k = 0;
+                    for (int x2 = 0; x2 < MaskSize; x2++)
+                    {
+                        for (int y2 = 0; y2 < MaskSize; y2++)
+                        {
+                            arrayB[k] = Source_frame.Data[y + y2, x + x2, 0];
+                            arrayG[k] = Source_frame.Data[y + y2, x + x2, 1];
+                            arrayR[k] = Source_frame.Data[y + y2, x + x2, 2];
+                            k++;
+                        }
+                    }
+                    Array.Sort(arrayB);
+                    Array.Sort(arrayG);
+                    Array.Sort(arrayR);
+                    if (MaskSize % 2 == 1)
+                    {
+                        Result_frame.Data[y, x, 0] = (byte)arrayB[squrtMaskSize / 2 + 1];
+                        Result_frame.Data[y, x, 1] = (byte)arrayG[squrtMaskSize / 2 + 1];
+                        Result_frame.Data[y, x, 2] = (byte)arrayR[squrtMaskSize / 2 + 1];
+                    }
+                    else
+                    {
+                        Result_frame.Data[y, x, 0] = (byte)((arrayB[squrtMaskSize / 2] + arrayB[squrtMaskSize / 2 + 1]) / 2);
+                        Result_frame.Data[y, x, 1] = (byte)((arrayG[squrtMaskSize / 2] + arrayG[squrtMaskSize / 2 + 1]) / 2);
+                        Result_frame.Data[y, x, 2] = (byte)((arrayR[squrtMaskSize / 2] + arrayR[squrtMaskSize / 2 + 1]) / 2);
+                    }
+                }
+            for (int y = 0; y < height - MaskSize + 1; y++)
+                for (int x = width - MaskSize + 1; x < width; x++)
+                {
+                    Result_frame.Data[y, x, 0] = Result_frame.Data[y, x - MaskSize + 1, 0];
+                    Result_frame.Data[y, x, 1] = Result_frame.Data[y, x - MaskSize + 1, 1];
+                    Result_frame.Data[y, x, 2] = Result_frame.Data[y, x - MaskSize + 1, 2];
+                }
+            for (int y = height - MaskSize + 1; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    Result_frame.Data[y, x, 0] = Result_frame.Data[y - MaskSize + 1, x, 0];
+                    Result_frame.Data[y, x, 1] = Result_frame.Data[y - MaskSize + 1, x, 1];
+                    Result_frame.Data[y, x, 2] = Result_frame.Data[y - MaskSize + 1, x, 2];
+                }
+            OutputPictureBox.Image = Result_frame.ToBitmap();
+        }
     }
 }

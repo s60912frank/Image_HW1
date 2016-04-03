@@ -189,7 +189,7 @@
             // 
             this.thresholdBar.Enabled = false;
             this.thresholdBar.Location = new System.Drawing.Point(64, 305);
-            this.thresholdBar.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.thresholdBar.Margin = new System.Windows.Forms.Padding(2);
             this.thresholdBar.Maximum = 255;
             this.thresholdBar.Name = "thresholdBar";
             this.thresholdBar.Size = new System.Drawing.Size(213, 45);
