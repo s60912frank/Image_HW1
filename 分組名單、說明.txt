@@ -1,8 +1,14 @@
 組員:
+102820011 潘俊廷
+102820036 陳繼民
+102820038 陳晏羲
 
 
 Visual Studio版本:
 
+Visual Studio 2013 
+
 
 EMGUCV版本:
 
+EmguCV2.4.10
