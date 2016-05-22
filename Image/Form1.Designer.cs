@@ -43,6 +43,7 @@
             this.exitButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
             this.thresholdBar = new System.Windows.Forms.TrackBar();
+            this.webButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.SourcePictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdBar)).BeginInit();
@@ -197,11 +198,22 @@
             this.thresholdBar.Value = 127;
             this.thresholdBar.Scroll += new System.EventHandler(this.thresholdBar_Scroll);
             // 
+            // webButton
+            // 
+            this.webButton.Location = new System.Drawing.Point(12, 388);
+            this.webButton.Name = "webButton";
+            this.webButton.Size = new System.Drawing.Size(85, 23);
+            this.webButton.TabIndex = 28;
+            this.webButton.Text = "開啟攝影機";
+            this.webButton.UseVisualStyleBackColor = true;
+            this.webButton.Click += new System.EventHandler(this.webButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(585, 431);
+            this.Controls.Add(this.webButton);
             this.Controls.Add(this.thresholdBar);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.exitButton);
@@ -243,6 +255,7 @@
         private System.Windows.Forms.Button exitButton;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.TrackBar thresholdBar;
+        private System.Windows.Forms.Button webButton;
     }
 }
 

@@ -23,6 +23,7 @@ namespace Image
         private Image<Bgr, Byte> Temp_Frame;  //複製Source_frame數據到Temp_Frame，方便進行影像處理
         private Image<Gray, Byte> grayImage = null; //new灰階畫面
         private Image<Bgr, Byte> Result_frame = null;  //最後呈現的畫面(RGB專用)
+        private Capture webCam = null;
        
         private int width;  //圖片的寬度
         private int height; //圖片的長度
@@ -132,7 +133,7 @@ namespace Image
         }
    
 
-        /// 浮雕
+        // 浮雕
         private void reliefButton_Click(object sender, EventArgs e) 
         {
             thresholdBar.Enabled = false;
@@ -291,6 +292,18 @@ namespace Image
                     Result_frame.Data[y, x, 2] = Result_frame.Data[y - MaskSize + 1, x, 2];
                 }
             OutputPictureBox.Image = Result_frame.ToBitmap();
+        }
+
+        private void webButton_Click(object sender, EventArgs e)
+        {
+            webCam = new Capture(0);
+            Application.Idle += new EventHandler(Application_Idle);
+        }
+
+        void Application_Idle(object sender, EventArgs e)
+        {
+            Image<Bgr, Byte> camImage = webCam.QueryFrame().ToImage<Bgr, Byte>();
+            SourcePictureBox.Image = camImage.ToBitmap();
         }
     }
 }
