@@ -20,3 +20,25 @@ D:\Visual studio projects\Image_HW1-master\Image\obj\x64\Debug\Image.Properties.
 D:\Visual studio projects\Image_HW1-master\Image\obj\x64\Debug\Image.csproj.GenerateResource.Cache
 D:\Visual studio projects\Image_HW1-master\Image\obj\x64\Debug\Image.exe
 D:\Visual studio projects\Image_HW1-master\Image\obj\x64\Debug\Image.pdb
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Image.exe.config
+C:\Users\潘\Desktop\GitHubProjects\image\Image\obj\x64\Debug\Image.exe
+C:\Users\潘\Desktop\GitHubProjects\image\Image\obj\x64\Debug\Image.pdb
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\opencv_ffmpeg310.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\opencv_ffmpeg310_64.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Image.exe
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Image.pdb
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2010.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2012.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2013.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2015.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.UI.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.UI.GL.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.World.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\ZedGraph.dll
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.UI.xml
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.UI.GL.xml
+C:\Users\潘\Desktop\GitHubProjects\image\Image\bin\x64\Debug\Emgu.CV.World.xml
+C:\Users\潘\Desktop\GitHubProjects\image\Image\obj\x64\Debug\Image.Form1.resources
+C:\Users\潘\Desktop\GitHubProjects\image\Image\obj\x64\Debug\Image.Properties.Resources.resources
+C:\Users\潘\Desktop\GitHubProjects\image\Image\obj\x64\Debug\Image.csproj.GenerateResource.Cache
+C:\Users\潘\Desktop\GitHubProjects\image\Image\obj\x64\Debug\Image.csprojResolveAssemblyReference.cache

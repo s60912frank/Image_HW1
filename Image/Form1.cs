@@ -23,7 +23,8 @@ namespace Image
         private Image<Bgr, Byte> Temp_Frame;  //複製Source_frame數據到Temp_Frame，方便進行影像處理
         private Image<Gray, Byte> grayImage = null; //new灰階畫面
         private Image<Bgr, Byte> Result_frame = null;  //最後呈現的畫面(RGB專用)
-        private Capture webCam = null;
+        private Capture webCam = null;//擷取攝影機影像
+        private CascadeClassifier _cascadeClassifier;//人臉辨識用
        
         private int width;  //圖片的寬度
         private int height; //圖片的長度
@@ -296,8 +297,10 @@ namespace Image
 
         private void webButton_Click(object sender, EventArgs e)
         {
-            webCam = new Capture(0);
-            Application.Idle += new EventHandler(Application_Idle);
+            webCam = new Capture();
+            /*Application.Idle += new EventHandler(Application_Idle);*/
+            Image<Bgr, Byte> camImage = webCam.QueryFrame().ToImage<Bgr, Byte>();//test
+            SourcePictureBox.Image = camImage.ToBitmap();//test
         }
 
         void Application_Idle(object sender, EventArgs e)
@@ -305,5 +308,42 @@ namespace Image
             Image<Bgr, Byte> camImage = webCam.QueryFrame().ToImage<Bgr, Byte>();
             SourcePictureBox.Image = camImage.ToBitmap();
         }
+
+        private void faceButton_Click(object sender, EventArgs e)//因為我系統找不到Camera, 無法實測功能是否正確
+        {
+            _cascadeClassifier = new CascadeClassifier(Application.StartupPath + "/haarcascade_frontalface_default.xml");//路徑不知對不對
+            using (var imageFrame = webCam.QueryFrame().ToImage<Bgr, Byte>())
+            {
+                if (imageFrame != null)
+                {
+                    var grayframe = imageFrame.Convert<Gray, byte>();
+                    var faces = _cascadeClassifier.DetectMultiScale(grayframe, 1.1, 10, Size.Empty); //the actual face detection happens here
+                    foreach (var face in faces)
+                    {
+                        imageFrame.Draw(face, new Bgr(Color.BurlyWood), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
+                    }
+                }
+                SourcePictureBox.Image = imageFrame.ToBitmap();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)//測試人臉辨識用 圖像的格式有錯誤不知怎改
+        {
+
+            Image<Bgr, byte> imageFrame = new Image<Bgr, byte>(SourcePictureBox.Image);
+            _cascadeClassifier = new CascadeClassifier(Application.StartupPath + "/haarcascade_frontalface_default.xml");
+            if (imageFrame != null)
+            {
+                var grayframe = imageFrame.Convert<Gray, byte>();
+                var faces = _cascadeClassifier.DetectMultiScale(grayframe, 1.1, 10, Size.Empty); //the actual face detection happens here
+                foreach (var face in faces)
+                {
+                    imageFrame.Draw(face, new Bgr(Color.BurlyWood), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
+                }
+            }
+            SourcePictureBox.Image = imageFrame.ToBitmap();
+        }
+
+
     }
 }

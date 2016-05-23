@@ -44,6 +44,8 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.thresholdBar = new System.Windows.Forms.TrackBar();
             this.webButton = new System.Windows.Forms.Button();
+            this.faceButton = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.SourcePictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdBar)).BeginInit();
@@ -208,11 +210,33 @@
             this.webButton.UseVisualStyleBackColor = true;
             this.webButton.Click += new System.EventHandler(this.webButton_Click);
             // 
+            // faceButton
+            // 
+            this.faceButton.Location = new System.Drawing.Point(289, 388);
+            this.faceButton.Name = "faceButton";
+            this.faceButton.Size = new System.Drawing.Size(75, 23);
+            this.faceButton.TabIndex = 29;
+            this.faceButton.Text = "人臉辨識";
+            this.faceButton.UseVisualStyleBackColor = true;
+            this.faceButton.Click += new System.EventHandler(this.faceButton_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(386, 390);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(78, 29);
+            this.button1.TabIndex = 30;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(585, 431);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.faceButton);
             this.Controls.Add(this.webButton);
             this.Controls.Add(this.thresholdBar);
             this.Controls.Add(this.saveButton);
@@ -256,6 +280,8 @@
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.TrackBar thresholdBar;
         private System.Windows.Forms.Button webButton;
+        private System.Windows.Forms.Button faceButton;
+        private System.Windows.Forms.Button button1;
     }
 }
 
