@@ -35,6 +35,17 @@ namespace Image
             Binarization,
             MedianFilter
         };
+
+        private LiveProcess nowLiveprocess = LiveProcess.None;
+        private enum LiveProcess
+        {
+            None,
+            FaceDetection,
+            GrayScale,
+            Binarization,
+            Negtive,
+            Mirror
+        };
    
         public Form1()
         {
@@ -63,74 +74,91 @@ namespace Image
         //灰階
         private void grayButton_Click(object sender, EventArgs e)  
         {
+            nowLiveprocess = LiveProcess.GrayScale;
+            //還要做一下讀圖的灰階
+        }
+
+        private void GrayScale(Image<Bgr, Byte> source)
+        {
             thresholdBar.Enabled = false;
-            for (int y = 0; y < height; y++)
+            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
+            for (int y = 0; y < source.Height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < source.Width; x++)
                 {
-                    byte pixelB = Source_frame.Data[y, x, 0];
-                    byte pixelG = Source_frame.Data[y, x, 1];
-                    byte pixelR = Source_frame.Data[y, x, 2];
+                    byte pixelB = source.Data[y, x, 0];
+                    byte pixelG = source.Data[y, x, 1];
+                    byte pixelR = source.Data[y, x, 2];
                     byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
-                    Result_frame.Data[y, x, 0] = grayPixel;
-                    Result_frame.Data[y, x, 1] = grayPixel;
-                    Result_frame.Data[y, x, 2] = grayPixel;
+                    result.Data[y, x, 0] = grayPixel;
+                    result.Data[y, x, 1] = grayPixel;
+                    result.Data[y, x, 2] = grayPixel;
                 }
             }
-            OutputPictureBox.Image = Result_frame.ToBitmap();
+            OutputPictureBox.Image = result.ToBitmap();
         }
-  
-     
 
         //二值化
         private void binarizationButton_Click(object sender, EventArgs e)
         {
             thresholdBar.Enabled = true;
             nowProcess = Process.Binarization;
+            nowLiveprocess = LiveProcess.Binarization;
             thresholdBar.Maximum = Byte.MaxValue;
             thresholdBar.Minimum = Byte.MinValue;
             thresholdBar.Value = 127;
-            Binarization();
+            Binarization(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
         }
 
-
+        private void Negtive(Image<Bgr, byte> source)
+        {
+            thresholdBar.Enabled = false;
+            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
+            for (int y = 0; y < source.Height; y++)
+            {
+                for (int x = 0; x < source.Width; x++)
+                {
+                    byte pixelB = source.Data[y, x, 0];
+                    byte pixelG = source.Data[y, x, 1];
+                    byte pixelR = source.Data[y, x, 2];
+                    result.Data[y, x, 0] = (byte)(Byte.MaxValue - pixelB);
+                    result.Data[y, x, 1] = (byte)(Byte.MaxValue - pixelG);
+                    result.Data[y, x, 2] = (byte)(Byte.MaxValue - pixelR);
+                }
+            }
+            OutputPictureBox.Image = result.ToBitmap();
+        }
 
         //負片
         private void negativeButton_Click(object sender, EventArgs e)
         {
-            thresholdBar.Enabled = false;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    byte pixelB = Source_frame.Data[y, x, 0];
-                    byte pixelG = Source_frame.Data[y, x, 1];
-                    byte pixelR = Source_frame.Data[y, x, 2];
-                    Result_frame.Data[y, x, 0] = (byte)(Byte.MaxValue - pixelB);
-                    Result_frame.Data[y, x, 1] = (byte)(Byte.MaxValue - pixelG);
-                    Result_frame.Data[y, x, 2] = (byte)(Byte.MaxValue - pixelR);
-                }
-            }
-            OutputPictureBox.Image = Result_frame.ToBitmap();
+            nowLiveprocess = LiveProcess.Negtive;
         }
      
         //鏡射
         private void mirrorButton_Click(object sender, EventArgs e)
         {
+            nowLiveprocess = LiveProcess.Mirror;
+        }
+
+        private void Mirror(Image<Bgr, Byte> source)
+        {
+            //會盪掉不知為何
             thresholdBar.Enabled = false;
-            for (int y = 0; y < height; y++)
+            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
+            for (int y = 0; y < source.Height; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < source.Width; x++)
                 {
-                    byte pixelB = Source_frame.Data[y, x, 0];
-                    byte pixelG = Source_frame.Data[y, x, 1];
-                    byte pixelR = Source_frame.Data[y, x, 2];
-                    Result_frame.Data[y, width - x - 1, 0] = pixelB;
-                    Result_frame.Data[y, width - x - 1, 1] = pixelG;
-                    Result_frame.Data[y, width - x - 1, 2] = pixelR;
+                    byte pixelB = source.Data[y, x, 0];
+                    byte pixelG = source.Data[y, x, 1];
+                    byte pixelR = source.Data[y, x, 2];
+                    result.Data[y, width - x - 1, 0] = pixelB;
+                    result.Data[y, width - x - 1, 1] = pixelG;
+                    result.Data[y, width - x - 1, 2] = pixelR;
                 }
             }
-            OutputPictureBox.Image = Result_frame.ToBitmap();
+            OutputPictureBox.Image = result.ToBitmap();
         }
    
 
@@ -206,7 +234,7 @@ namespace Image
             {
                 thresholdBar.Maximum = Byte.MaxValue;
                 thresholdBar.Minimum = Byte.MinValue;
-                Binarization();
+                Binarization(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
             }
             else if (nowProcess == Process.MedianFilter)
             {
@@ -214,31 +242,32 @@ namespace Image
             }
         }
 
-        private void Binarization() //二值化
+        private void Binarization(Image<Bgr,Byte> source) //二值化
         {
-            for (int y = 0; y < height; y++)
+            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
+            for (int y = 0; y < source.Height /2; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < source.Width / 2; x++)
                 {
-                    byte pixelB = Source_frame.Data[y, x, 0];
-                    byte pixelG = Source_frame.Data[y, x, 1];
-                    byte pixelR = Source_frame.Data[y, x, 2];
+                    byte pixelB = source.Data[y, x, 0];
+                    byte pixelG = source.Data[y, x, 1];
+                    byte pixelR = source.Data[y, x, 2];
                     byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
                     if (grayPixel >= thresholdBar.Value)
                     {
-                        Result_frame.Data[y, x, 0] = Byte.MaxValue;
-                        Result_frame.Data[y, x, 1] = Byte.MaxValue;
-                        Result_frame.Data[y, x, 2] = Byte.MaxValue;
+                        result.Data[y, x, 0] = Byte.MaxValue;
+                        result.Data[y, x, 1] = Byte.MaxValue;
+                        result.Data[y, x, 2] = Byte.MaxValue;
                     }
                     else
                     {
-                        Result_frame.Data[y, x, 0] = Byte.MinValue;
-                        Result_frame.Data[y, x, 1] = Byte.MinValue;
-                        Result_frame.Data[y, x, 2] = Byte.MinValue;
+                        result.Data[y, x, 0] = Byte.MinValue;
+                        result.Data[y, x, 1] = Byte.MinValue;
+                        result.Data[y, x, 2] = Byte.MinValue;
                     }
                 }
             }
-            OutputPictureBox.Image = Result_frame.ToBitmap();
+            OutputPictureBox.Image = result.ToBitmap();
         }
 
         private void MedianFilter() //中值濾波
@@ -298,52 +327,52 @@ namespace Image
         private void webButton_Click(object sender, EventArgs e)
         {
             webCam = new Capture();
-            /*Application.Idle += new EventHandler(Application_Idle);*/
-            Image<Bgr, Byte> camImage = webCam.QueryFrame().ToImage<Bgr, Byte>();//test
-            SourcePictureBox.Image = camImage.ToBitmap();//test
+            Application.Idle += new EventHandler(Application_Idle);
+            saveButton.Enabled = grayButton.Enabled = reliefButton.Enabled = negativeButton.Enabled = mirrorButton.Enabled = binarizationButton.Enabled = MedianButton.Enabled = true;
         }
 
         void Application_Idle(object sender, EventArgs e)
         {
             Image<Bgr, Byte> camImage = webCam.QueryFrame().ToImage<Bgr, Byte>();
             SourcePictureBox.Image = camImage.ToBitmap();
+            switch (nowLiveprocess)
+            {
+                case LiveProcess.FaceDetection:
+                    FaceDetection(camImage);
+                    break;
+                case LiveProcess.Binarization:
+                    Binarization(camImage);
+                    break;
+                case LiveProcess.GrayScale:
+                    GrayScale(camImage);
+                    break;
+                case LiveProcess.Negtive:
+                    Negtive(camImage);
+                    break;
+                case LiveProcess.Mirror:
+                    Mirror(camImage);
+                    break;
+            }
         }
 
         private void faceButton_Click(object sender, EventArgs e)//因為我系統找不到Camera, 無法實測功能是否正確
         {
-            _cascadeClassifier = new CascadeClassifier(Application.StartupPath + "/haarcascade_frontalface_default.xml");//路徑不知對不對
-            using (var imageFrame = webCam.QueryFrame().ToImage<Bgr, Byte>())
-            {
-                if (imageFrame != null)
-                {
-                    var grayframe = imageFrame.Convert<Gray, byte>();
-                    var faces = _cascadeClassifier.DetectMultiScale(grayframe, 1.1, 10, Size.Empty); //the actual face detection happens here
-                    foreach (var face in faces)
-                    {
-                        imageFrame.Draw(face, new Bgr(Color.BurlyWood), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
-                    }
-                }
-                SourcePictureBox.Image = imageFrame.ToBitmap();
-            }
+            nowLiveprocess = LiveProcess.FaceDetection;
         }
 
-        private void button1_Click(object sender, EventArgs e)//測試人臉辨識用 圖像的格式有錯誤不知怎改
+        private void FaceDetection(Image<Bgr,Byte> source)
         {
-
-            Image<Bgr, byte> imageFrame = new Image<Bgr, byte>(SourcePictureBox.Image);
-            _cascadeClassifier = new CascadeClassifier(Application.StartupPath + "/haarcascade_frontalface_default.xml");
-            if (imageFrame != null)
+            _cascadeClassifier = new CascadeClassifier(Application.StartupPath + "/haarcascade_frontalface_default.xml");//路徑不知對不對
+            if (source != null)
             {
-                var grayframe = imageFrame.Convert<Gray, byte>();
-                var faces = _cascadeClassifier.DetectMultiScale(grayframe, 1.1, 10, Size.Empty); //the actual face detection happens here
+                var grayframe = source.Convert<Gray, byte>();
+                var faces = _cascadeClassifier.DetectMultiScale(grayframe); //the actual face detection happens here
                 foreach (var face in faces)
                 {
-                    imageFrame.Draw(face, new Bgr(Color.BurlyWood), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
+                    source.Draw(face, new Bgr(Color.Red), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
                 }
             }
-            SourcePictureBox.Image = imageFrame.ToBitmap();
+            OutputPictureBox.Image = source.ToBitmap();
         }
-
-
     }
 }
