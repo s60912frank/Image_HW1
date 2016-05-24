@@ -45,7 +45,7 @@
             this.thresholdBar = new System.Windows.Forms.TrackBar();
             this.webButton = new System.Windows.Forms.Button();
             this.faceButton = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.detectButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.SourcePictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdBar)).BeginInit();
@@ -127,7 +127,7 @@
             // mirrorButton
             // 
             this.mirrorButton.Enabled = false;
-            this.mirrorButton.Location = new System.Drawing.Point(289, 359);
+            this.mirrorButton.Location = new System.Drawing.Point(289, 334);
             this.mirrorButton.Name = "mirrorButton";
             this.mirrorButton.Size = new System.Drawing.Size(75, 23);
             this.mirrorButton.TabIndex = 21;
@@ -138,7 +138,7 @@
             // MedianButton
             // 
             this.MedianButton.Enabled = false;
-            this.MedianButton.Location = new System.Drawing.Point(491, 352);
+            this.MedianButton.Location = new System.Drawing.Point(491, 334);
             this.MedianButton.Name = "MedianButton";
             this.MedianButton.Size = new System.Drawing.Size(75, 36);
             this.MedianButton.TabIndex = 22;
@@ -149,7 +149,7 @@
             // reliefButton
             // 
             this.reliefButton.Enabled = false;
-            this.reliefButton.Location = new System.Drawing.Point(389, 359);
+            this.reliefButton.Location = new System.Drawing.Point(389, 334);
             this.reliefButton.Name = "reliefButton";
             this.reliefButton.Size = new System.Drawing.Size(75, 23);
             this.reliefButton.TabIndex = 23;
@@ -169,7 +169,7 @@
             // 
             // exitButton
             // 
-            this.exitButton.Location = new System.Drawing.Point(491, 403);
+            this.exitButton.Location = new System.Drawing.Point(491, 376);
             this.exitButton.Name = "exitButton";
             this.exitButton.Size = new System.Drawing.Size(75, 23);
             this.exitButton.TabIndex = 25;
@@ -191,7 +191,7 @@
             // thresholdBar
             // 
             this.thresholdBar.Enabled = false;
-            this.thresholdBar.Location = new System.Drawing.Point(64, 305);
+            this.thresholdBar.Location = new System.Drawing.Point(37, 305);
             this.thresholdBar.Margin = new System.Windows.Forms.Padding(2);
             this.thresholdBar.Maximum = 255;
             this.thresholdBar.Name = "thresholdBar";
@@ -202,7 +202,7 @@
             // 
             // webButton
             // 
-            this.webButton.Location = new System.Drawing.Point(12, 388);
+            this.webButton.Location = new System.Drawing.Point(100, 359);
             this.webButton.Name = "webButton";
             this.webButton.Size = new System.Drawing.Size(85, 23);
             this.webButton.TabIndex = 28;
@@ -212,7 +212,7 @@
             // 
             // faceButton
             // 
-            this.faceButton.Location = new System.Drawing.Point(289, 388);
+            this.faceButton.Location = new System.Drawing.Point(289, 363);
             this.faceButton.Name = "faceButton";
             this.faceButton.Size = new System.Drawing.Size(75, 23);
             this.faceButton.TabIndex = 29;
@@ -220,21 +220,21 @@
             this.faceButton.UseVisualStyleBackColor = true;
             this.faceButton.Click += new System.EventHandler(this.faceButton_Click);
             // 
-            // button1
+            // detectButton
             // 
-            this.button1.Location = new System.Drawing.Point(386, 390);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(78, 29);
-            this.button1.TabIndex = 30;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.detectButton.Location = new System.Drawing.Point(389, 363);
+            this.detectButton.Name = "detectButton";
+            this.detectButton.Size = new System.Drawing.Size(75, 23);
+            this.detectButton.TabIndex = 30;
+            this.detectButton.Text = "物件追蹤";
+            this.detectButton.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(585, 431);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(585, 408);
+            this.Controls.Add(this.detectButton);
             this.Controls.Add(this.faceButton);
             this.Controls.Add(this.webButton);
             this.Controls.Add(this.thresholdBar);
@@ -280,7 +280,7 @@
         private System.Windows.Forms.TrackBar thresholdBar;
         private System.Windows.Forms.Button webButton;
         private System.Windows.Forms.Button faceButton;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button detectButton;
     }
 }
 
