@@ -45,7 +45,7 @@
             this.thresholdBar = new System.Windows.Forms.TrackBar();
             this.webButton = new System.Windows.Forms.Button();
             this.faceButton = new System.Windows.Forms.Button();
-            this.detectButton = new System.Windows.Forms.Button();
+            this.camShiftButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.SourcePictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdBar)).BeginInit();
@@ -59,6 +59,10 @@
             this.SourcePictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.SourcePictureBox.TabIndex = 0;
             this.SourcePictureBox.TabStop = false;
+            this.SourcePictureBox.Paint += new System.Windows.Forms.PaintEventHandler(this.SourcePictureBox_Paint);
+            this.SourcePictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.SourcePictureBox_MouseDown);
+            this.SourcePictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.SourcePictureBox_MouseMove);
+            this.SourcePictureBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.SourcePictureBox_MouseUp);
             // 
             // OutputPictureBox
             // 
@@ -220,21 +224,22 @@
             this.faceButton.UseVisualStyleBackColor = true;
             this.faceButton.Click += new System.EventHandler(this.faceButton_Click);
             // 
-            // detectButton
+            // camShiftButton
             // 
-            this.detectButton.Location = new System.Drawing.Point(389, 363);
-            this.detectButton.Name = "detectButton";
-            this.detectButton.Size = new System.Drawing.Size(75, 23);
-            this.detectButton.TabIndex = 30;
-            this.detectButton.Text = "物件追蹤";
-            this.detectButton.UseVisualStyleBackColor = true;
+            this.camShiftButton.Location = new System.Drawing.Point(389, 363);
+            this.camShiftButton.Name = "camShiftButton";
+            this.camShiftButton.Size = new System.Drawing.Size(75, 23);
+            this.camShiftButton.TabIndex = 30;
+            this.camShiftButton.Text = "Cam Shift";
+            this.camShiftButton.UseVisualStyleBackColor = true;
+            this.camShiftButton.Click += new System.EventHandler(this.camShiftButton_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(585, 408);
-            this.Controls.Add(this.detectButton);
+            this.Controls.Add(this.camShiftButton);
             this.Controls.Add(this.faceButton);
             this.Controls.Add(this.webButton);
             this.Controls.Add(this.thresholdBar);
@@ -280,7 +285,7 @@
         private System.Windows.Forms.TrackBar thresholdBar;
         private System.Windows.Forms.Button webButton;
         private System.Windows.Forms.Button faceButton;
-        private System.Windows.Forms.Button detectButton;
+        private System.Windows.Forms.Button camShiftButton;
     }
 }
 

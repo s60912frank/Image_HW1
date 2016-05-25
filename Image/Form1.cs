@@ -12,6 +12,7 @@ namespace Image
     {
         private Capture webCam = null;//擷取攝影機影像
         private bool _isCamOpen = false;
+        private MCvConnectedComp comp;
 
         private Process nowProcess = Process.Binarization;
         private enum Process
@@ -401,6 +402,57 @@ namespace Image
                 }
             }
             OutputPictureBox.Image = source.ToBitmap();
+        }
+
+        //private Emgu.CV.Structure.MCvAvgComp=
+        public Image<Hsv, Byte> hsv;
+        public Image<Gray, Byte> hue;
+        public Image<Gray, Byte> mask;
+        public Image<Gray, Byte> backproject;
+        public DenseHistogram hist;
+        private Rectangle trackingWindow;
+        private MCvConnectedComp trackcomp;
+        //private MCvBox2D trackbox;  不知為何沒這東西
+
+        private void camShiftButton_Click(object sender, EventArgs e)
+        {
+            //追蹤物體
+        }
+
+        //以下是在picturebox中畫框框
+        private bool drawing = false;
+        private Rectangle rect = new Rectangle();
+
+        private void SourcePictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            rect.Location = e.Location;
+            rect.Size = new Size(0, 0);
+            drawing = true;
+        }
+
+        private void SourcePictureBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (drawing)
+            {
+                rect.Size = new Size(e.Location.X - rect.Location.X, e.Location.Y - rect.Location.Y);
+                SourcePictureBox.Invalidate();
+            }
+        }
+
+        private void SourcePictureBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (drawing)
+            {
+                drawing = false;
+            }
+        }
+
+        private void SourcePictureBox_Paint(object sender, PaintEventArgs e)
+        {
+            if (rect != null)
+            {
+                e.Graphics.DrawRectangle(Pens.Red, rect);
+            }
         }
     }
 }
