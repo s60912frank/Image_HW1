@@ -12,7 +12,9 @@ namespace Image
     {
         private Capture webCam = null;//擷取攝影機影像
         private bool _isCamOpen = false;
-        private MCvConnectedComp comp;
+
+        //FOR CAMSHIFT
+        private Rectangle sourceRect = new Rectangle();
 
         private Process nowProcess = Process.Binarization;
         private enum Process
@@ -30,7 +32,8 @@ namespace Image
             Binarization,
             Negtive,
             Mirror,
-            Relief
+            Relief,
+            CamShift
         };
    
         public Form1()
@@ -44,7 +47,8 @@ namespace Image
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 Image<Bgr, byte> Source_frame = new Image<Bgr, byte>(openFileDialog.FileName);     //將圖片資訊存到Source_frame
-                SourcePictureBox.Image = Source_frame.ToBitmap();   //將Source_frame轉成Bitmap格式呈現到PictureBox
+                //SourcePictureBox.Image = Source_frame.ToBitmap();   //將Source_frame轉成Bitmap格式呈現到PictureBox
+                SetFrameToBox(Source_frame, SourcePictureBox);
                 saveButton.Enabled=grayButton.Enabled = reliefButton.Enabled = negativeButton.Enabled = mirrorButton.Enabled = binarizationButton.Enabled = MedianButton.Enabled = true;
             }
         }
@@ -69,10 +73,21 @@ namespace Image
             }
         }
 
+        private void SetFrameToBox(Image<Bgr,Byte> source, PictureBox box)
+        {
+            int fixedWidth = box.Width;
+            double ratio = (double)source.Height / (double)source.Width;
+            source.Resize(fixedWidth, (int)(fixedWidth * ratio), Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+            box.Size = new Size(fixedWidth, (int)(fixedWidth * ratio));
+            box.Image = source.ToBitmap();
+        }
+
         void Application_Idle(object sender, EventArgs e)
         {
-            Image<Bgr, Byte> camImage = webCam.QueryFrame().ToImage<Bgr, Byte>();
-            SourcePictureBox.Image = camImage.ToBitmap();
+            Image<Bgr, Byte> camImage = webCam.QueryFrame().Convert<Bgr, byte>();
+            
+            //SourcePictureBox.Image = camImage.ToBitmap();
+            SetFrameToBox(camImage, SourcePictureBox);
             switch (nowLiveprocess)
             {
                 case LiveProcess.FaceDetection:
@@ -92,6 +107,12 @@ namespace Image
                     break;
                 case LiveProcess.Relief:
                     Relief(camImage);
+                    break;
+                case LiveProcess.CamShift:
+                    //camShiftSource = camImage;
+                    //ObjectTracking(camImage, sourceRect);
+                    ObjectTracking(new Image<Bgr, byte>((Bitmap)SourcePictureBox.Image), sourceRect);
+                    //camShiftSource = camImage;
                     break;
             }
         }
@@ -167,7 +188,7 @@ namespace Image
             }
             else
             {
-                Relief(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                Relief(new Image<Bgr, byte>((Bitmap)SourcePictureBox.Image));
             }
         }
 
@@ -215,10 +236,16 @@ namespace Image
         {
             thresholdBar.Enabled = false;
             Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
+            //MessageBox.Show(source.Size.Height.ToString());
             for (int y = 0; y < source.Height; y++)
             {
                 for (int x = 0; x < source.Width; x++)
                 {
+                    if(source.Data == null)
+                    {
+                        //source.
+                        MessageBox.Show(source.Size.ToString());
+                    }
                     byte pixelB = source.Data[y, x, 0];
                     byte pixelG = source.Data[y, x, 1];
                     byte pixelR = source.Data[y, x, 2];
@@ -228,7 +255,8 @@ namespace Image
                     result.Data[y, x, 2] = grayPixel;
                 }
             }
-            OutputPictureBox.Image = result.ToBitmap();
+            //OutputPictureBox.Image = result.ToBitmap();
+            SetFrameToBox(result, OutputPictureBox);
         }
 
         private void Mirror(Image<Bgr, Byte> source)
@@ -395,7 +423,7 @@ namespace Image
             if (source != null)
             {
                 var grayframe = source.Convert<Gray, byte>();
-                var faces = cascadeClassifier.DetectMultiScale(grayframe); //the actual face detection happens here
+                var faces = cascadeClassifier.DetectMultiScale(grayframe, 1.1, 1, new Size(10, 10), Size.Empty); //the actual face detection happens here
                 foreach (var face in faces)
                 {
                     source.Draw(face, new Bgr(Color.Red), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
@@ -404,29 +432,21 @@ namespace Image
             OutputPictureBox.Image = source.ToBitmap();
         }
 
-        //private Emgu.CV.Structure.MCvAvgComp=
-        public Image<Hsv, Byte> hsv;
-        public Image<Gray, Byte> hue;
-        public Image<Gray, Byte> mask;
-        public Image<Gray, Byte> backproject;
-        public DenseHistogram hist;
-        private Rectangle trackingWindow;
-        private MCvConnectedComp trackcomp;
-        //private MCvBox2D trackbox;  不知為何沒這東西
-
         private void camShiftButton_Click(object sender, EventArgs e)
         {
             //追蹤物體
+            nowLiveprocess = LiveProcess.CamShift;
         }
 
         //以下是在picturebox中畫框框
         private bool drawing = false;
-        private Rectangle rect = new Rectangle();
+        private Rectangle tempRect = new Rectangle();
 
         private void SourcePictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            rect.Location = e.Location;
-            rect.Size = new Size(0, 0);
+            sourceRect = Rectangle.Empty;
+            tempRect.Location = e.Location;
+            tempRect.Size = new Size(0, 0);
             drawing = true;
         }
 
@@ -434,25 +454,141 @@ namespace Image
         {
             if (drawing)
             {
-                rect.Size = new Size(e.Location.X - rect.Location.X, e.Location.Y - rect.Location.Y);
-                SourcePictureBox.Invalidate();
+                tempRect.Size = new Size(e.Location.X - tempRect.Location.X, e.Location.Y - tempRect.Location.Y);
+                //SourcePictureBox.Invalidate();
+                TestDraw(new Image<Bgr, byte>((Bitmap)SourcePictureBox.Image));
             }
         }
 
         private void SourcePictureBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (drawing)
+            if (drawing && nowLiveprocess == LiveProcess.CamShift)
             {
                 drawing = false;
+                sourceRect = tempRect;
+                //do tracking
+                //ObjectTracking(camShiftSource, sourceRect);
             }
+        }
+
+        private void TestDraw(Image<Bgr, byte> image)
+        {
+            image.Draw(tempRect, new Bgr(Color.Red), 2);
+            //SourcePictureBox.Image = image.ToBitmap();
+            SetFrameToBox(image, SourcePictureBox);
         }
 
         private void SourcePictureBox_Paint(object sender, PaintEventArgs e)
         {
-            if (rect != null)
+            //if (tempRect != null && nowLiveprocess == LiveProcess.CamShift)
+            //{
+            //    e.Graphics.DrawRectangle(Pens.Red, tempRect);
+            //}
+        }
+
+        public Image<Hsv, byte> hsv;
+        public Image<Gray, byte> hue;
+        public Image<Gray, byte> mask;
+        public Image<Gray, byte> backproject;
+        public DenseHistogram hist;
+        //private Rectangle trackingWindow;
+        private MCvConnectedComp trackcomp;
+        private MCvBox2D trackbox;
+        private void ObjectTracking(Image<Bgr, Byte> image, Rectangle ROI)
+        {
+            SetFrameToBox(image, OutputPictureBox);
+            if (ROI.Size != Size.Empty)
             {
-                e.Graphics.DrawRectangle(Pens.Red, rect);
+                // Initialize parameters
+                trackbox = new MCvBox2D();
+                trackcomp = new MCvConnectedComp();
+                hue = new Image<Gray, byte>(image.Width, image.Height);
+                hue._EqualizeHist();
+                mask = new Image<Gray, byte>(image.Width, image.Height);
+                hist = new DenseHistogram(30, new RangeF(0, 180));
+                backproject = new Image<Gray, byte>(image.Width, image.Height);
+
+                // Assign Object's ROI from source image.
+                sourceRect = ROI;
+
+                //UpdateHue(image);
+                // Producing Object's hist
+                CalObjectHist(image);
+
+                //OutputPictureBox.Invalidate();
+                Image<Bgr, byte> Result_frame = new Image<Bgr, byte>((Bitmap)OutputPictureBox.Image);
+                Rectangle resultRectanle = TrackingResult(Result_frame);  //更改Result_frame為output影像
+                Result_frame.Draw(resultRectanle, new Bgr(Color.Red), 2);
+                //OutputPictureBox.Image = Result_frame.ToBitmap();
+                SetFrameToBox(Result_frame, OutputPictureBox);
             }
         }
+
+        private void UpdateHue(Image<Bgr, Byte> image)
+        {
+            // release previous image memory
+            if (hsv != null) hsv.Dispose();
+            hsv = image.Convert<Hsv, Byte>();
+
+            // Drop low saturation pixels
+            mask = hsv.Split()[1].ThresholdBinary(new Gray(60), new Gray(255));
+            CvInvoke.cvInRangeS(hsv, new MCvScalar(0, 30, Math.Min(10, 255), 0),
+                new MCvScalar(180, 256, Math.Max(10, 255), 0), mask);
+
+            // Get Hue
+            hue = hsv.Split()[0];
+        }
+
+        private void CalObjectHist(Image<Bgr, Byte> image)
+        {
+            UpdateHue(image);
+
+            // Set tracking object's ROI
+            hue.ROI = sourceRect;
+            mask.ROI = sourceRect;
+            hist.Calculate(new Image<Gray, byte>[] { hue }, false, mask);
+
+            // Scale Historgram
+            float max = 0, min = 0, scale = 0;
+            int[] minLocations, maxLocations;
+            hist.MinMax(out min, out max, out minLocations, out maxLocations);
+            if (max != 0)
+            {
+                scale = 255 / max;
+            }
+            CvInvoke.cvConvertScale(hist.MCvHistogram.bins, hist.MCvHistogram.bins, scale, 0);
+
+            // Clear ROI
+            hue.ROI = Rectangle.Empty;
+            mask.ROI = Rectangle.Empty;
+
+            // Now we have Object's Histogram, called hist.
+        }
+        public Rectangle TrackingResult(Image<Bgr, Byte> image)
+        {
+            UpdateHue(image);
+            Rectangle resultRect;
+            // Calucate BackProject
+            backproject = hist.BackProject(new Image<Gray, byte>[] { hue });
+
+            // Apply mask
+            backproject._And(mask);
+
+            // Tracking windows empty means camshift lost bounding-box last time
+            // here we give camshift a new start window from 0,0 (you could change it)
+            if (sourceRect.IsEmpty || sourceRect.Width == 0 || sourceRect.Height == 0)
+            {
+                resultRect = new Rectangle(0, 0, 100, 100);
+            }
+            CvInvoke.cvCamShift(backproject, sourceRect,
+                new MCvTermCriteria(10, 1), out trackcomp, out trackbox);
+
+            // update tracking window
+            resultRect = trackcomp.rect;
+
+            return resultRect;
+        }
+
     }
 }
+//}
