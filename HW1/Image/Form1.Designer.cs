@@ -55,20 +55,19 @@
             // 
             this.SourcePictureBox.Location = new System.Drawing.Point(12, 40);
             this.SourcePictureBox.Name = "SourcePictureBox";
-            this.SourcePictureBox.Size = new System.Drawing.Size(264, 245);
+            this.SourcePictureBox.Size = new System.Drawing.Size(400, 400);
             this.SourcePictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.SourcePictureBox.TabIndex = 0;
             this.SourcePictureBox.TabStop = false;
-            this.SourcePictureBox.Paint += new System.Windows.Forms.PaintEventHandler(this.SourcePictureBox_Paint);
             this.SourcePictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.SourcePictureBox_MouseDown);
             this.SourcePictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.SourcePictureBox_MouseMove);
             this.SourcePictureBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.SourcePictureBox_MouseUp);
             // 
             // OutputPictureBox
             // 
-            this.OutputPictureBox.Location = new System.Drawing.Point(310, 40);
+            this.OutputPictureBox.Location = new System.Drawing.Point(437, 40);
             this.OutputPictureBox.Name = "OutputPictureBox";
-            this.OutputPictureBox.Size = new System.Drawing.Size(265, 245);
+            this.OutputPictureBox.Size = new System.Drawing.Size(400, 400);
             this.OutputPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.OutputPictureBox.TabIndex = 2;
             this.OutputPictureBox.TabStop = false;
@@ -85,7 +84,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(308, 9);
+            this.label3.Location = new System.Drawing.Point(435, 9);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(69, 12);
             this.label3.TabIndex = 5;
@@ -98,7 +97,7 @@
             // grayButton
             // 
             this.grayButton.Enabled = false;
-            this.grayButton.Location = new System.Drawing.Point(289, 305);
+            this.grayButton.Location = new System.Drawing.Point(416, 476);
             this.grayButton.Name = "grayButton";
             this.grayButton.Size = new System.Drawing.Size(75, 23);
             this.grayButton.TabIndex = 18;
@@ -109,7 +108,7 @@
             // binarizationButton
             // 
             this.binarizationButton.Enabled = false;
-            this.binarizationButton.Location = new System.Drawing.Point(389, 305);
+            this.binarizationButton.Location = new System.Drawing.Point(516, 476);
             this.binarizationButton.Name = "binarizationButton";
             this.binarizationButton.Size = new System.Drawing.Size(75, 23);
             this.binarizationButton.TabIndex = 19;
@@ -120,7 +119,7 @@
             // negativeButton
             // 
             this.negativeButton.Enabled = false;
-            this.negativeButton.Location = new System.Drawing.Point(491, 305);
+            this.negativeButton.Location = new System.Drawing.Point(618, 476);
             this.negativeButton.Name = "negativeButton";
             this.negativeButton.Size = new System.Drawing.Size(75, 23);
             this.negativeButton.TabIndex = 20;
@@ -131,7 +130,7 @@
             // mirrorButton
             // 
             this.mirrorButton.Enabled = false;
-            this.mirrorButton.Location = new System.Drawing.Point(289, 334);
+            this.mirrorButton.Location = new System.Drawing.Point(416, 505);
             this.mirrorButton.Name = "mirrorButton";
             this.mirrorButton.Size = new System.Drawing.Size(75, 23);
             this.mirrorButton.TabIndex = 21;
@@ -142,7 +141,7 @@
             // MedianButton
             // 
             this.MedianButton.Enabled = false;
-            this.MedianButton.Location = new System.Drawing.Point(491, 334);
+            this.MedianButton.Location = new System.Drawing.Point(618, 505);
             this.MedianButton.Name = "MedianButton";
             this.MedianButton.Size = new System.Drawing.Size(75, 36);
             this.MedianButton.TabIndex = 22;
@@ -153,7 +152,7 @@
             // reliefButton
             // 
             this.reliefButton.Enabled = false;
-            this.reliefButton.Location = new System.Drawing.Point(389, 334);
+            this.reliefButton.Location = new System.Drawing.Point(516, 505);
             this.reliefButton.Name = "reliefButton";
             this.reliefButton.Size = new System.Drawing.Size(75, 23);
             this.reliefButton.TabIndex = 23;
@@ -163,7 +162,7 @@
             // 
             // load_Button
             // 
-            this.load_Button.Location = new System.Drawing.Point(12, 359);
+            this.load_Button.Location = new System.Drawing.Point(139, 530);
             this.load_Button.Name = "load_Button";
             this.load_Button.Size = new System.Drawing.Size(85, 23);
             this.load_Button.TabIndex = 24;
@@ -173,7 +172,7 @@
             // 
             // exitButton
             // 
-            this.exitButton.Location = new System.Drawing.Point(491, 376);
+            this.exitButton.Location = new System.Drawing.Point(618, 547);
             this.exitButton.Name = "exitButton";
             this.exitButton.Size = new System.Drawing.Size(75, 23);
             this.exitButton.TabIndex = 25;
@@ -184,7 +183,7 @@
             // saveButton
             // 
             this.saveButton.Enabled = false;
-            this.saveButton.Location = new System.Drawing.Point(191, 359);
+            this.saveButton.Location = new System.Drawing.Point(318, 530);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(85, 23);
             this.saveButton.TabIndex = 26;
@@ -195,7 +194,7 @@
             // thresholdBar
             // 
             this.thresholdBar.Enabled = false;
-            this.thresholdBar.Location = new System.Drawing.Point(37, 305);
+            this.thresholdBar.Location = new System.Drawing.Point(164, 476);
             this.thresholdBar.Margin = new System.Windows.Forms.Padding(2);
             this.thresholdBar.Maximum = 255;
             this.thresholdBar.Name = "thresholdBar";
@@ -206,7 +205,7 @@
             // 
             // webButton
             // 
-            this.webButton.Location = new System.Drawing.Point(100, 359);
+            this.webButton.Location = new System.Drawing.Point(227, 530);
             this.webButton.Name = "webButton";
             this.webButton.Size = new System.Drawing.Size(85, 23);
             this.webButton.TabIndex = 28;
@@ -216,7 +215,7 @@
             // 
             // faceButton
             // 
-            this.faceButton.Location = new System.Drawing.Point(289, 363);
+            this.faceButton.Location = new System.Drawing.Point(416, 534);
             this.faceButton.Name = "faceButton";
             this.faceButton.Size = new System.Drawing.Size(75, 23);
             this.faceButton.TabIndex = 29;
@@ -226,7 +225,7 @@
             // 
             // camShiftButton
             // 
-            this.camShiftButton.Location = new System.Drawing.Point(389, 363);
+            this.camShiftButton.Location = new System.Drawing.Point(516, 534);
             this.camShiftButton.Name = "camShiftButton";
             this.camShiftButton.Size = new System.Drawing.Size(75, 23);
             this.camShiftButton.TabIndex = 30;
@@ -238,7 +237,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(585, 408);
+            this.ClientSize = new System.Drawing.Size(871, 578);
             this.Controls.Add(this.camShiftButton);
             this.Controls.Add(this.faceButton);
             this.Controls.Add(this.webButton);

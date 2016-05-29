@@ -12,9 +12,17 @@ namespace Image
     {
         private Capture webCam = null;//擷取攝影機影像
         private bool _isCamOpen = false;
+        private Image<Bgr, Byte> Source_frame = null;   //呈現Load圖片的畫面
+        private Image<Bgr, Byte> Result_frame = null;  //最後呈現的畫面(RGB專用)
 
         //FOR CAMSHIFT
         private Rectangle sourceRect = new Rectangle();
+
+        //scale
+        private double _xScale;
+        private double _yScale;
+        private int _pressX;
+        private int _pressY;
 
         private Process nowProcess = Process.Binarization;
         private enum Process
@@ -46,9 +54,10 @@ namespace Image
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                Image<Bgr, byte> Source_frame = new Image<Bgr, byte>(openFileDialog.FileName);     //將圖片資訊存到Source_frame
+                Source_frame = new Image<Bgr, byte>(openFileDialog.FileName);     //將圖片資訊存到Source_frame
                 //SourcePictureBox.Image = Source_frame.ToBitmap();   //將Source_frame轉成Bitmap格式呈現到PictureBox
-                SetFrameToBox(Source_frame, SourcePictureBox);
+                SourcePictureBox.Image = Source_frame.ToBitmap();
+                ReSizePictureBox();
                 saveButton.Enabled=grayButton.Enabled = reliefButton.Enabled = negativeButton.Enabled = mirrorButton.Enabled = binarizationButton.Enabled = MedianButton.Enabled = true;
             }
         }
@@ -73,46 +82,59 @@ namespace Image
             }
         }
 
-        private void SetFrameToBox(Image<Bgr,Byte> source, PictureBox box)
+        //private void SetFrameToBox(Image<Bgr,Byte> source, PictureBox box)
+        //{
+        //    _yScale = (double)source.Height / SourcePictureBox.Height;
+
+        //    int fixedWidth = box.Width;
+        //    double ratio = (double)source.Height / (double)source.Width;
+        //    source.Resize(fixedWidth, (int)(fixedWidth * ratio), Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        //    box.Size = new Size(fixedWidth, (int)(fixedWidth * ratio));
+        //    box.Image = source.ToBitmap();
+        //}
+
+        //調整PictureBox為Image大小.
+        private void ReSizePictureBox()
         {
-            int fixedWidth = box.Width;
-            double ratio = (double)source.Height / (double)source.Width;
-            source.Resize(fixedWidth, (int)(fixedWidth * ratio), Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
-            box.Size = new Size(fixedWidth, (int)(fixedWidth * ratio));
-            box.Image = source.ToBitmap();
+            if (Source_frame != null)
+            {
+                _yScale = (double)Source_frame.Height / SourcePictureBox.Height;
+                SourcePictureBox.Size = new Size((int)(Source_frame.Width / _yScale), SourcePictureBox.Height);
+                OutputPictureBox.Image = Source_frame.ToBitmap();
+            }
         }
 
         void Application_Idle(object sender, EventArgs e)
         {
-            Image<Bgr, Byte> camImage = webCam.QueryFrame().Convert<Bgr, byte>();
-            
-            //SourcePictureBox.Image = camImage.ToBitmap();
-            SetFrameToBox(camImage, SourcePictureBox);
+            Source_frame = webCam.QueryFrame().Convert<Bgr, byte>();
+            SourcePictureBox.Image = Source_frame.ToBitmap();
+            //SetFrameToBox(Source_frame, SourcePictureBox);
             switch (nowLiveprocess)
             {
                 case LiveProcess.FaceDetection:
-                    FaceDetection(camImage);
+                    FaceDetection();
                     break;
                 case LiveProcess.Binarization:
-                    Binarization(camImage);
+                    Binarization();
                     break;
                 case LiveProcess.GrayScale:
-                    GrayScale(camImage);
+                    GrayScale();
                     break;
                 case LiveProcess.Negtive:
-                    Negtive(camImage);
+                    Negtive();
                     break;
                 case LiveProcess.Mirror:
-                    Mirror(camImage);
+                    Mirror();
                     break;
                 case LiveProcess.Relief:
-                    Relief(camImage);
+                    Relief();
                     break;
                 case LiveProcess.CamShift:
                     //camShiftSource = camImage;
                     //ObjectTracking(camImage, sourceRect);
-                    ObjectTracking(new Image<Bgr, byte>((Bitmap)SourcePictureBox.Image), sourceRect);
+                    //ObjectTracking(Source_frame, sourceRect);
                     //camShiftSource = camImage;
+                    KeepTracking();
                     break;
             }
         }
@@ -131,7 +153,7 @@ namespace Image
             }
             else
             {
-                GrayScale(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                GrayScale();
             }
         }
 
@@ -149,7 +171,7 @@ namespace Image
             else
             {
                 nowProcess = Process.Binarization;
-                Binarization(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                Binarization();
             }
         }
 
@@ -162,7 +184,7 @@ namespace Image
             }
             else
             {
-                Negtive(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                Negtive();
             }
         }
      
@@ -175,7 +197,7 @@ namespace Image
             }
             else
             {
-                Mirror(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                Mirror();
             }
         }
 
@@ -188,7 +210,7 @@ namespace Image
             }
             else
             {
-                Relief(new Image<Bgr, byte>((Bitmap)SourcePictureBox.Image));
+                Relief();
             }
         }
 
@@ -200,7 +222,7 @@ namespace Image
             thresholdBar.Maximum = 10;
             thresholdBar.Minimum = 3;
             thresholdBar.Value = 3;
-            MedianFilter(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+            MedianFilter();
         }
 
         //結束主程式
@@ -224,147 +246,142 @@ namespace Image
             {
                 thresholdBar.Maximum = Byte.MaxValue;
                 thresholdBar.Minimum = Byte.MinValue;
-                Binarization(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                Binarization();
             }
             else if (nowProcess == Process.MedianFilter)
             {
-                MedianFilter(new Image<Bgr, Byte>((Bitmap)SourcePictureBox.Image));
+                MedianFilter();
             }
         }
 
-        private void GrayScale(Image<Bgr, Byte> source)
+        private void GrayScale()
         {
             thresholdBar.Enabled = false;
-            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
+            Result_frame = new Image<Bgr, byte>(Source_frame.Size);
             //MessageBox.Show(source.Size.Height.ToString());
-            for (int y = 0; y < source.Height; y++)
+            for (int y = 0; y < Source_frame.Height; y++)
             {
-                for (int x = 0; x < source.Width; x++)
+                for (int x = 0; x < Source_frame.Width; x++)
                 {
-                    if(source.Data == null)
-                    {
-                        //source.
-                        MessageBox.Show(source.Size.ToString());
-                    }
-                    byte pixelB = source.Data[y, x, 0];
-                    byte pixelG = source.Data[y, x, 1];
-                    byte pixelR = source.Data[y, x, 2];
+                    byte pixelB = Source_frame.Data[y, x, 0];
+                    byte pixelG = Source_frame.Data[y, x, 1];
+                    byte pixelR = Source_frame.Data[y, x, 2];
                     byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
-                    result.Data[y, x, 0] = grayPixel;
-                    result.Data[y, x, 1] = grayPixel;
-                    result.Data[y, x, 2] = grayPixel;
+                    Result_frame.Data[y, x, 0] = grayPixel;
+                    Result_frame.Data[y, x, 1] = grayPixel;
+                    Result_frame.Data[y, x, 2] = grayPixel;
                 }
             }
-            //OutputPictureBox.Image = result.ToBitmap();
-            SetFrameToBox(result, OutputPictureBox);
+            OutputPictureBox.Image = Result_frame.ToBitmap();
+            //SetFrameToBox(Result_frame, OutputPictureBox);
         }
 
-        private void Mirror(Image<Bgr, Byte> source)
+        private void Mirror()
         {
             thresholdBar.Enabled = false;
-            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
-            for (int y = 0; y < source.Height; y++)
+            Result_frame = new Image<Bgr, byte>(Source_frame.Size);
+            for (int y = 0; y < Source_frame.Height; y++)
             {
-                for (int x = 0; x < source.Width; x++)
+                for (int x = 0; x < Source_frame.Width; x++)
                 {
-                    byte pixelB = source.Data[y, x, 0];
-                    byte pixelG = source.Data[y, x, 1];
-                    byte pixelR = source.Data[y, x, 2];
-                    result.Data[y, source.Width - x - 1, 0] = pixelB;
-                    result.Data[y, source.Width - x - 1, 1] = pixelG;
-                    result.Data[y, source.Width - x - 1, 2] = pixelR;
+                    byte pixelB = Source_frame.Data[y, x, 0];
+                    byte pixelG = Source_frame.Data[y, x, 1];
+                    byte pixelR = Source_frame.Data[y, x, 2];
+                    Result_frame.Data[y, Source_frame.Width - x - 1, 0] = pixelB;
+                    Result_frame.Data[y, Source_frame.Width - x - 1, 1] = pixelG;
+                    Result_frame.Data[y, Source_frame.Width - x - 1, 2] = pixelR;
                 }
             }
-            OutputPictureBox.Image = result.ToBitmap();
+            OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
-        private void Negtive(Image<Bgr, byte> source)
+        private void Negtive()
         {
             thresholdBar.Enabled = false;
-            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
-            for (int y = 0; y < source.Height; y++)
+            Result_frame = new Image<Bgr, byte>(Source_frame.Size);
+            for (int y = 0; y < Source_frame.Height; y++)
             {
-                for (int x = 0; x < source.Width; x++)
+                for (int x = 0; x < Source_frame.Width; x++)
                 {
-                    byte pixelB = source.Data[y, x, 0];
-                    byte pixelG = source.Data[y, x, 1];
-                    byte pixelR = source.Data[y, x, 2];
-                    result.Data[y, x, 0] = (byte)(Byte.MaxValue - pixelB);
-                    result.Data[y, x, 1] = (byte)(Byte.MaxValue - pixelG);
-                    result.Data[y, x, 2] = (byte)(Byte.MaxValue - pixelR);
+                    byte pixelB = Source_frame.Data[y, x, 0];
+                    byte pixelG = Source_frame.Data[y, x, 1];
+                    byte pixelR = Source_frame.Data[y, x, 2];
+                    Result_frame.Data[y, x, 0] = (byte)(Byte.MaxValue - pixelB);
+                    Result_frame.Data[y, x, 1] = (byte)(Byte.MaxValue - pixelG);
+                    Result_frame.Data[y, x, 2] = (byte)(Byte.MaxValue - pixelR);
                 }
             }
-            OutputPictureBox.Image = result.ToBitmap();
+            OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
-        private void Binarization(Image<Bgr,Byte> source) //二值化
+        private void Binarization() //二值化
         {
-            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
-            for (int y = 0; y < source.Height; y++)
+            Result_frame = new Image<Bgr, byte>(Source_frame.Size);
+            for (int y = 0; y < Source_frame.Height; y++)
             {
-                for (int x = 0; x < source.Width; x++)
+                for (int x = 0; x < Source_frame.Width; x++)
                 {
-                    byte pixelB = source.Data[y, x, 0];
-                    byte pixelG = source.Data[y, x, 1];
-                    byte pixelR = source.Data[y, x, 2];
+                    byte pixelB = Source_frame.Data[y, x, 0];
+                    byte pixelG = Source_frame.Data[y, x, 1];
+                    byte pixelR = Source_frame.Data[y, x, 2];
                     byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
                     if (grayPixel >= thresholdBar.Value)
                     {
-                        result.Data[y, x, 0] = Byte.MaxValue;
-                        result.Data[y, x, 1] = Byte.MaxValue;
-                        result.Data[y, x, 2] = Byte.MaxValue;
+                        Result_frame.Data[y, x, 0] = Byte.MaxValue;
+                        Result_frame.Data[y, x, 1] = Byte.MaxValue;
+                        Result_frame.Data[y, x, 2] = Byte.MaxValue;
                     }
                     else
                     {
-                        result.Data[y, x, 0] = Byte.MinValue;
-                        result.Data[y, x, 1] = Byte.MinValue;
-                        result.Data[y, x, 2] = Byte.MinValue;
+                        Result_frame.Data[y, x, 0] = Byte.MinValue;
+                        Result_frame.Data[y, x, 1] = Byte.MinValue;
+                        Result_frame.Data[y, x, 2] = Byte.MinValue;
                     }
                 }
             }
-            OutputPictureBox.Image = result.ToBitmap();
+            OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
-        private void Relief(Image<Bgr, Byte> source)
+        private void Relief()
         {
             thresholdBar.Enabled = false;
-            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
-            for (int y = 0; y < source.Height; y++)
+            Result_frame = new Image<Bgr, byte>(Source_frame.Size);
+            for (int y = 0; y < Source_frame.Height; y++)
             {
-                for (int x = 0; x < source.Width - 1; x++)
+                for (int x = 0; x < Source_frame.Width - 1; x++)
                 {
-                    byte pixelB = source.Data[y, x, 0];
-                    byte pixelG = source.Data[y, x, 1];
-                    byte pixelR = source.Data[y, x, 2];
+                    byte pixelB = Source_frame.Data[y, x, 0];
+                    byte pixelG = Source_frame.Data[y, x, 1];
+                    byte pixelR = Source_frame.Data[y, x, 2];
                     byte grayPixel = (byte)((pixelB + pixelG + pixelR) / 3);
-                    byte pixelB2 = source.Data[y, x + 1, 0];
-                    byte pixelG2 = source.Data[y, x + 1, 1];
-                    byte pixelR2 = source.Data[y, x + 1, 2];
+                    byte pixelB2 = Source_frame.Data[y, x + 1, 0];
+                    byte pixelG2 = Source_frame.Data[y, x + 1, 1];
+                    byte pixelR2 = Source_frame.Data[y, x + 1, 2];
                     byte grayPixel2 = (byte)((pixelB2 + pixelG2 + pixelR2) / 3);
 
                     int direction = (grayPixel - grayPixel2) > 0 ? 1 : -1;
                     int difference = Math.Abs(grayPixel - grayPixel2);
                     byte Result = (byte)(direction * Math.Sqrt(difference / 2) * Math.Sqrt(127) + 127);
 
-                    result.Data[y, x, 0] = Result;
-                    result.Data[y, x, 1] = Result;
-                    result.Data[y, x, 2] = Result;
+                    Result_frame.Data[y, x, 0] = Result;
+                    Result_frame.Data[y, x, 1] = Result;
+                    Result_frame.Data[y, x, 2] = Result;
                 }
             }
-            for (int y = 0; y < source.Height; y++)
+            for (int y = 0; y < Source_frame.Height; y++)
             {
-                result.Data[y, source.Width - 1, 0] = result.Data[y, source.Width - 2, 0];
-                result.Data[y, source.Width - 1, 1] = result.Data[y, source.Width - 2, 0];
-                result.Data[y, source.Width - 1, 2] = result.Data[y, source.Width - 2, 0];
+                Result_frame.Data[y, Source_frame.Width - 1, 0] = Result_frame.Data[y, Source_frame.Width - 2, 0];
+                Result_frame.Data[y, Source_frame.Width - 1, 1] = Result_frame.Data[y, Source_frame.Width - 2, 0];
+                Result_frame.Data[y, Source_frame.Width - 1, 2] = Result_frame.Data[y, Source_frame.Width - 2, 0];
             }
-            OutputPictureBox.Image = result.ToBitmap();
+            OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
-        private void MedianFilter(Image<Bgr, Byte> source) //中值濾波
+        private void MedianFilter() //中值濾波
         {
-            Image<Bgr, Byte> result = new Image<Bgr, byte>(source.Size);
-            int height = source.Height;
-            int width = source.Width;
+            Result_frame = new Image<Bgr, byte>(Source_frame.Size);
+            int height = Source_frame.Height;
+            int width = Source_frame.Width;
             int MaskSize = thresholdBar.Value;
             int squrtMaskSize = MaskSize * MaskSize;
             for (int y = 0; y < height - MaskSize + 1; y++)
@@ -378,9 +395,9 @@ namespace Image
                     {
                         for (int y2 = 0; y2 < MaskSize; y2++)
                         {
-                            arrayB[k] = source.Data[y + y2, x + x2, 0];
-                            arrayG[k] = source.Data[y + y2, x + x2, 1];
-                            arrayR[k] = source.Data[y + y2, x + x2, 2];
+                            arrayB[k] = Source_frame.Data[y + y2, x + x2, 0];
+                            arrayG[k] = Source_frame.Data[y + y2, x + x2, 1];
+                            arrayR[k] = Source_frame.Data[y + y2, x + x2, 2];
                             k++;
                         }
                     }
@@ -389,47 +406,47 @@ namespace Image
                     Array.Sort(arrayR);
                     if (MaskSize % 2 == 1)
                     {
-                        result.Data[y, x, 0] = (byte)arrayB[squrtMaskSize / 2 + 1];
-                        result.Data[y, x, 1] = (byte)arrayG[squrtMaskSize / 2 + 1];
-                        result.Data[y, x, 2] = (byte)arrayR[squrtMaskSize / 2 + 1];
+                        Result_frame.Data[y, x, 0] = (byte)arrayB[squrtMaskSize / 2 + 1];
+                        Result_frame.Data[y, x, 1] = (byte)arrayG[squrtMaskSize / 2 + 1];
+                        Result_frame.Data[y, x, 2] = (byte)arrayR[squrtMaskSize / 2 + 1];
                     }
                     else
                     {
-                        result.Data[y, x, 0] = (byte)((arrayB[squrtMaskSize / 2] + arrayB[squrtMaskSize / 2 + 1]) / 2);
-                        result.Data[y, x, 1] = (byte)((arrayG[squrtMaskSize / 2] + arrayG[squrtMaskSize / 2 + 1]) / 2);
-                        result.Data[y, x, 2] = (byte)((arrayR[squrtMaskSize / 2] + arrayR[squrtMaskSize / 2 + 1]) / 2);
+                        Result_frame.Data[y, x, 0] = (byte)((arrayB[squrtMaskSize / 2] + arrayB[squrtMaskSize / 2 + 1]) / 2);
+                        Result_frame.Data[y, x, 1] = (byte)((arrayG[squrtMaskSize / 2] + arrayG[squrtMaskSize / 2 + 1]) / 2);
+                        Result_frame.Data[y, x, 2] = (byte)((arrayR[squrtMaskSize / 2] + arrayR[squrtMaskSize / 2 + 1]) / 2);
                     }
                 }
             for (int y = 0; y < height - MaskSize + 1; y++)
                 for (int x = width - MaskSize + 1; x < width; x++)
                 {
-                    result.Data[y, x, 0] = result.Data[y, x - MaskSize + 1, 0];
-                    result.Data[y, x, 1] = result.Data[y, x - MaskSize + 1, 1];
-                    result.Data[y, x, 2] = result.Data[y, x - MaskSize + 1, 2];
+                    Result_frame.Data[y, x, 0] = Result_frame.Data[y, x - MaskSize + 1, 0];
+                    Result_frame.Data[y, x, 1] = Result_frame.Data[y, x - MaskSize + 1, 1];
+                    Result_frame.Data[y, x, 2] = Result_frame.Data[y, x - MaskSize + 1, 2];
                 }
             for (int y = height - MaskSize + 1; y < height; y++)
                 for (int x = 0; x < width; x++)
                 {
-                    result.Data[y, x, 0] = result.Data[y - MaskSize + 1, x, 0];
-                    result.Data[y, x, 1] = result.Data[y - MaskSize + 1, x, 1];
-                    result.Data[y, x, 2] = result.Data[y - MaskSize + 1, x, 2];
+                    Result_frame.Data[y, x, 0] = Result_frame.Data[y - MaskSize + 1, x, 0];
+                    Result_frame.Data[y, x, 1] = Result_frame.Data[y - MaskSize + 1, x, 1];
+                    Result_frame.Data[y, x, 2] = Result_frame.Data[y - MaskSize + 1, x, 2];
                 }
-            OutputPictureBox.Image = result.ToBitmap();
+            OutputPictureBox.Image = Result_frame.ToBitmap();
         }
 
-        private void FaceDetection(Image<Bgr,Byte> source)
+        private void FaceDetection()
         {
             CascadeClassifier cascadeClassifier = new CascadeClassifier(Application.StartupPath + "/haarcascade_frontalface_default.xml");//路徑不知對不對
-            if (source != null)
+            if (Source_frame != null)
             {
-                var grayframe = source.Convert<Gray, byte>();
-                var faces = cascadeClassifier.DetectMultiScale(grayframe, 1.1, 1, new Size(10, 10), Size.Empty); //the actual face detection happens here
+                var grayframe = Source_frame.Convert<Gray, byte>();
+                var faces = cascadeClassifier.DetectMultiScale(grayframe, 1.1, 3, Size.Empty, Size.Empty); //the actual face detection happens here
                 foreach (var face in faces)
                 {
-                    source.Draw(face, new Bgr(Color.Red), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
+                    Source_frame.Draw(face, new Bgr(Color.Red), 3); //the detected face(s) is highlighted here using a box that is drawn around it/them
                 }
             }
-            OutputPictureBox.Image = source.ToBitmap();
+            OutputPictureBox.Image = Source_frame.ToBitmap();
         }
 
         private void camShiftButton_Click(object sender, EventArgs e)
@@ -444,19 +461,26 @@ namespace Image
 
         private void SourcePictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            sourceRect = Rectangle.Empty;
-            tempRect.Location = e.Location;
-            tempRect.Size = new Size(0, 0);
-            drawing = true;
+            if (Source_frame != null && nowLiveprocess == LiveProcess.CamShift)
+            {
+                sourceRect = Rectangle.Empty;
+                tempRect = Rectangle.Empty;
+                _pressX = e.X;
+                _pressY = e.Y;
+                drawing = true;
+                _xScale = (double)Source_frame.Width / SourcePictureBox.Width;
+                _yScale = (double)Source_frame.Height / SourcePictureBox.Height;
+            }
         }
 
         private void SourcePictureBox_MouseMove(object sender, MouseEventArgs e)
         {
-            if (drawing)
+            if(drawing && Source_frame != null && nowLiveprocess == LiveProcess.CamShift)
             {
-                tempRect.Size = new Size(e.Location.X - tempRect.Location.X, e.Location.Y - tempRect.Location.Y);
-                //SourcePictureBox.Invalidate();
-                TestDraw(new Image<Bgr, byte>((Bitmap)SourcePictureBox.Image));
+                Image<Bgr, Byte> frame = Source_frame.Clone();
+                tempRect = new Rectangle((int)(_pressX * _xScale), (int)(_pressY * _yScale), (int)((e.X - _pressX) * _xScale), (int)((e.Y - _pressY) * _yScale));
+                frame.Draw(tempRect, new Bgr(Color.Red), 2);
+                SourcePictureBox.Image = frame.ToBitmap();
             }
         }
 
@@ -467,23 +491,8 @@ namespace Image
                 drawing = false;
                 sourceRect = tempRect;
                 //do tracking
-                //ObjectTracking(camShiftSource, sourceRect);
+                ObjectTracking(Source_frame, sourceRect);
             }
-        }
-
-        private void TestDraw(Image<Bgr, byte> image)
-        {
-            image.Draw(tempRect, new Bgr(Color.Red), 2);
-            //SourcePictureBox.Image = image.ToBitmap();
-            SetFrameToBox(image, SourcePictureBox);
-        }
-
-        private void SourcePictureBox_Paint(object sender, PaintEventArgs e)
-        {
-            //if (tempRect != null && nowLiveprocess == LiveProcess.CamShift)
-            //{
-            //    e.Graphics.DrawRectangle(Pens.Red, tempRect);
-            //}
         }
 
         public Image<Hsv, byte> hsv;
@@ -496,7 +505,7 @@ namespace Image
         private MCvBox2D trackbox;
         private void ObjectTracking(Image<Bgr, Byte> image, Rectangle ROI)
         {
-            SetFrameToBox(image, OutputPictureBox);
+            OutputPictureBox.Image = image.ToBitmap();
             if (ROI.Size != Size.Empty)
             {
                 // Initialize parameters
@@ -515,12 +524,25 @@ namespace Image
                 // Producing Object's hist
                 CalObjectHist(image);
 
-                //OutputPictureBox.Invalidate();
-                Image<Bgr, byte> Result_frame = new Image<Bgr, byte>((Bitmap)OutputPictureBox.Image);
+                Result_frame = Source_frame.Clone();
                 Rectangle resultRectanle = TrackingResult(Result_frame);  //更改Result_frame為output影像
                 Result_frame.Draw(resultRectanle, new Bgr(Color.Red), 2);
-                //OutputPictureBox.Image = Result_frame.ToBitmap();
-                SetFrameToBox(Result_frame, OutputPictureBox);
+                OutputPictureBox.Image = Result_frame.ToBitmap();
+            }
+        }
+
+        private void KeepTracking()
+        {
+            if (sourceRect.Size != Size.Empty)
+            {
+                Result_frame = Source_frame.Clone();
+                Rectangle resultRectanle = TrackingResult(Result_frame);  //更改Result_frame為output影像
+                Result_frame.Draw(resultRectanle, new Bgr(Color.Red), 2);
+                OutputPictureBox.Image = Result_frame.ToBitmap();
+            }
+            else
+            {
+                OutputPictureBox.Image = Source_frame.ToBitmap();
             }
         }
 
@@ -591,4 +613,3 @@ namespace Image
 
     }
 }
-//}
